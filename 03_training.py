@@ -86,7 +86,7 @@ augmented_models = {
         )
     }
 
-joblib.dump((models, augmented_models), "model_keys.joblib")
+joblib.dump((models, augmented_models), Path("models") / "model_keys.joblib")
 
             ##################################
             ### INNER 3:2 CROSS VALIDATION ###
@@ -166,10 +166,13 @@ for i in itertools.combinations(range(5), 3): # this loop gets all combinations
 
 
 ### aggregate probss and create stage 2 training data
+models_to_skip = ("MLP2", "GLM_")
 
 final_stage1_features = [] # aggregate 4 predictions per sample using the geometric mean (per model)
 
 for name in all_model_names: # iterate first thru models because we need to gmean probs per model (this is COLUMNS)
+    if name.startswith(models_to_skip):
+        continue
     model_gmean_probs = []
     
     for sample_idx in X_train.index:
@@ -192,13 +195,15 @@ for name in all_model_names: # iterate first thru models because we need to gmea
     final_stage1_features.append(df_model_probs) # adds this to list containing these evaluations for all samples for ALL models
 
 X_train_stage2 = pd.concat(final_stage1_features, axis=1) # concatenate list horizontally into pd
-X_train_stage2 = pd.concat([X_train_augmented, X_train_stage2], axis=1) # add original + umap
+# X_train_stage2 = pd.concat([X_train_augmented, X_train_stage2], axis=1) # add original + umap
+
+joblib.dump(X_train_stage2, Path("data") / "X_train_stage2.joblib")
 
 
 ### SAVE MODEL DICTIONARY
 
-joblib.dump(trained_models, "trained_models.joblib")
-joblib.dump(trained_augmented_models, "trained_augmented_models.joblib")
+# joblib.dump(trained_models, Path("models") / "trained_models.joblib")
+# joblib.dump(trained_augmented_models, Path("models") / "trained_augmented_models.joblib")
 
 
 ### metaclassifier training (XGB)
@@ -226,5 +231,5 @@ metaclassifier.fit(X_train_stage2, y_train)
 end_time = time.perf_counter()
 print(f"metaclassifier fit time: {time_convert(end_time - start_time)}")
 
-joblib.dump(metaclassifier, "metaclassifier.joblib")
+joblib.dump(metaclassifier, Path("models") / "metaclassifier.joblib")
 

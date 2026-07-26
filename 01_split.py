@@ -30,6 +30,8 @@ y = pd.read_csv(Path("data") / 'samples.csv', index_col = 0)
 
 le = LabelEncoder()
 y['disease.state2'] = le.fit_transform(y['disease.state'])
+joblib.dump(le , Path("data") / "le.joblib")
+
 
 # check for NA
 print(X.isna().sum().value_counts())

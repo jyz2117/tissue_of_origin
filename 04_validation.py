@@ -20,10 +20,14 @@ metaclassifier = joblib.load(Path("models") / "metaclassifier.joblib")
 
 
 ### stage 1 predictions
+models_to_skip = ("MLP2", "ExtraTrees")
 
 final_stage1_test_features = []
 
 for name in models.keys():
+    if name.startswith(models_to_skip):
+        continue
+
     model_fold_probs = [] # will be a list of prediction arrays, PER MODEL
     
     # gets models by looking for model name in the keys
@@ -45,6 +49,8 @@ for name in models.keys():
     final_stage1_test_features.append(df_model_probs) # add to list- e.g. item 1 will be the averaged probabilities for X_test as predictted by only ONE model
 
 for name in augmented_models.keys():
+    if name.startswith(models_to_skip):
+            continue
     model_fold_probs = []
     
     specific_trained_models = [m for k, m in trained_augmented_models.items() if k.startswith(name)]
@@ -65,7 +71,7 @@ for name in augmented_models.keys():
     final_stage1_test_features.append(df_model_probs)
 
 X_test_stage2 = pd.concat(final_stage1_test_features, axis=1) # turn into one big wide dataframe
-X_test_stage2 = pd.concat([X_test_augmented, X_test_stage2], axis=1) # add original and augmented data
+# X_test_stage2 = pd.concat([X_test_augmented, X_test_stage2], axis=1) # add original and augmented data
 
 ### stage 2 predictions
 

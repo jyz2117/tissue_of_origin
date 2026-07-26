@@ -10,6 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 
 import joblib
+from pathlib import Path
 
 def time_convert(time):
     if time < 60:
@@ -23,7 +24,7 @@ def time_convert(time):
             ### UMAP ###
             ############
 
-X_train, X_test, y_train, y_test = joblib.load("train_test_split.joblib")
+X_train, X_test, y_train, y_test = joblib.load(Path("data") / "train_test_split.joblib")
 
 # UMAP
 umap_reducer = umap.UMAP(n_neighbors=15, min_dist=0.1, n_components=3, random_state=42, n_jobs=1)
@@ -43,4 +44,4 @@ X_test_augmented = X_test.copy() # initialize augmented test set
 X_test_augmented[umap_cols] = pd.DataFrame(X_test_umap, index=X_test.index) # create augmented data
 X_test_umap = pd.DataFrame(X_test_umap, columns=umap_cols) # convert umap features to separate dataframe
 
-joblib.dump((X_train_augmented, X_test_augmented, umap_cols), "umap_data.joblib")
+joblib.dump((X_train_augmented, X_test_augmented, umap_cols), Path("data") / "umap_data.joblib")
