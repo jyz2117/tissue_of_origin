@@ -1,29 +1,39 @@
-# Cancer miRNA Stacking Classifier
+This repository contains the source code and methodology for developing a multi-class stacking classifier for 13 cancer types using circulating microRNA (miRNA) expression profiles from public microarray datasets.
 
-This repository contains the source code and methodology for developing a multi-class stacking classifier for 13 cancer types using circulating microRNA (miRNA) expression profiles from public microarray datasets[cite: 9].
+TISSUE_OF_ORIGIN/
+├── data/                       # Raw CSV files and generated joblib artifacts
+│   ├── dat.csv
+│   ├── sample_predictions.joblib
+│   ├── samples.csv
+│   ├── train_test_split.joblib
+│   ├── umap_data.joblib
+│   └── X_train_stage2.joblib
+├── models/                     # Saved joblib models and keys
+│   ├── all_trained_models.joblib
+│   ├── metaclassifier.joblib
+│   └── model_keys.joblib
+├── scripts/                    # Runnable pipeline entry points
+│   ├── main_pipeline.py        # End-to-end training and evaluation script
+│   ├── train.py                # Decoupled training execution script
+│   └── validate.py             # Decoupled validation/inference execution script
+├── src/                        # Core package source code
+│   ├── config.py               # Centralized configuration, paths, and model configs
+│   ├── data_prep.py            # Data loading and stratified splitting logic
+│   ├── stage1_train.py         # Base learner CV and probability aggregation
+│   ├── stage2_train.py         # Metaclassifier training logic
+│   ├── umap_aug.py             # UMAP reduction and feature augmentation
+│   ├── utils.py                # Time conversion and formatting utilities
+│   └── validation.py           # Evaluation functions and metrics calculations
+├── .gitignore
+├── documentation.md            # Raw methodology notes
+├── README.md                   # Project documentation
+└── requirements.txt            # Project dependencies
 
----
-
-## Repository Structure
-
-```text
-project_root/
-├── data/                   # Contains raw CSV files and generated joblib data
-├── models/                 # Contains saved joblib models (base models and metaclassifier)
-├── scripts/
-│   └── main_pipeline.py    # Main entry point for executing the training and evaluation pipeline
-├── src/                    # Source code package
-│   ├── __init__.py
-│   ├── config.py           # Configuration variables, paths, and model definitions
-│   ├── data_prep.py        # Data loading and stratified outer splitting
-│   ├── umap_aug.py         # UMAP dimensionality reduction and augmentation
-│   ├── stage1_train.py     # Base model training via custom 5-fold CV
-│   ├── stage2_train.py     # Metaclassifier training
-│   ├── validation.py       # Test set evaluation and scoring
-│   └── utils.py            # Helper functions
-├── README.md               # Project documentation
-└── requirements.txt        # package versions
-
-
+Installation: 
 
 pip install -r requirements.txt
+
+To run:
+
+python -m scripts.train
+python -m scripts.validate
