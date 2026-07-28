@@ -13,10 +13,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def main():
-    logger.info("VALIDATION PIPELINE START")
+    logger.info("VALIDATION START")
 
     # 1. Load Artifacts
-    logger.info("Loading test data and trained models from disk...")
+    logger.info("LOAD X_test, y_test, and all trained models")
     X_test = joblib.load(DATA_DIR / "X_test.joblib")
     y_test = joblib.load(DATA_DIR / "y_test.joblib")
     
@@ -24,10 +24,11 @@ def main():
     metaclassifier = joblib.load(MODELS_DIR / "metaclassifier.joblib")
 
     # 2. UMAP Augmentation (Inference Only)
+    logger.info("UMAP transformation on X_test")
     X_test_augmented = transform_umap_test(X_test)
 
     # 3. Run Pipeline Validation
-    logger.info("Initiating Test Pipeline Validation...")
+    logger.info("Predictions and stacking for stage 2")
     stage2_preds = test_pipeline(
         trained_models, 
         trained_augmented_models, 
@@ -37,10 +38,11 @@ def main():
     )
 
     # 4. Output Metrics
+    logger.info("Validate stage 2 and stage 1")
     validate_metaclassifier(y_test, stage2_preds)
     validate_stage1(trained_models, trained_augmented_models, X_test, X_test_augmented, y_test)
 
-    logger.info("VALIDATION PIPELINE COMPLETE")
+    logger.info("END")
 
 if __name__ == "__main__":
     main()
