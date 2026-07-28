@@ -1,6 +1,8 @@
 This repository contains the source code and methodology for developing a multi-class stacking classifier for 13 cancer types using circulating microRNA (miRNA) expression profiles from public microarray datasets.
 
-'''text
+## Repository Structure
+
+```text
 TISSUE_OF_ORIGIN/
 ├── data/                       # Raw CSV files and generated joblib artifacts
 │   ├── dat.csv
@@ -30,11 +32,11 @@ TISSUE_OF_ORIGIN/
 ├── README.md                   # Project documentation
 └── requirements.txt            # Project dependencies
 
-Installation: 
+INSTALLATION
 
-pip install -r requirements.txt
+pip install -r requirements.txt  
 
-To run:
+SCRIPTS
 
-python -m scripts.train
-python -m scripts.validate
+python -m scripts.train  
+python -m scripts.validate 
