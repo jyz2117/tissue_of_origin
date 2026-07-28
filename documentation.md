@@ -69,7 +69,7 @@ This process was repeated across all 10 combinations of chunks. In total,
         30
 
     - each sample appeared in 4 inner test sets and thus had 4 predicted probabilities for a given type of model
-    - each sample's 4 sets of predicted probabilities were geometrically averaged and concatentated to a new dataframe:
+    - each sample's 4 sets of predicted probabilities were geometrically averaged and concatenated to a new dataframe:
 
         rows: 7936 (patients)
         cols: 91 (7 models * 13 classes)
