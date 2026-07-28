@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def main():
     logger.info("VALIDATION START")
 
-    # 1. Load Artifacts
+    # 1. Load data
     logger.info("LOAD X_test, y_test, and all trained models")
     X_test = joblib.load(DATA_DIR / "X_test.joblib")
     y_test = joblib.load(DATA_DIR / "y_test.joblib")
@@ -23,11 +23,11 @@ def main():
     trained_models, trained_augmented_models = joblib.load(MODELS_DIR / "all_trained_models.joblib")
     metaclassifier = joblib.load(MODELS_DIR / "metaclassifier.joblib")
 
-    # 2. UMAP Augmentation (Inference Only)
+    # 2. UMAP aug (Inference Only)
     logger.info("UMAP transformation on X_test")
     X_test_augmented = transform_umap_test(X_test)
 
-    # 3. Run Pipeline Validation
+    # 3. validation
     logger.info("Predictions and stacking for stage 2")
     stage2_preds = test_pipeline(
         trained_models, 
@@ -37,7 +37,7 @@ def main():
         X_test_augmented
     )
 
-    # 4. Output Metrics
+    # 4. accuracy scoring
     logger.info("Validate stage 2 and stage 1")
     validate_metaclassifier(y_test, stage2_preds)
     validate_stage1(trained_models, trained_augmented_models, X_test, X_test_augmented, y_test)

@@ -1,38 +1,36 @@
-```markdown
 # Methodology
 
 ## 1. Study Design
 
-This project develops a multi-class stacking classifier for 13 cancer types using circulating microRNA (miRNA) expression profiles from public microarray datasets[cite: 9].
+This project develops a multi-class stacking classifier for 13 cancer types using circulating microRNA (miRNA) expression profiles from public microarray datasets.
 
-## 2. Data Sources
+## 2. Data 
 
-**GSE211692** - Serum microRNA profiles of 9,921 patients with 13 types of human solid cancers[cite: 9]:
+GSE211692 - Serum microRNA profiles of 9,921 patients with 13 types of human solid cancers:
 
-| Cancer Type | Sample Count |
-| :--- | :--- |
-| Lung cancer | 1699 |
-| Colorectal cancer | 1596 |
-| Gastric cancer | 1418 |
-| Prostate cancer | 1027 |
-| Pancreatic cancer | 851 |
-| Breast cancer | 675 |
-| Esophageal cancer | 566 |
-| Biliary tract cancer | 402 |
-| Ovarian cancer | 400 |
-| Bladder cancer | 399 |
-| Liver cancer | 348 |
-| Sarcoma | 299 |
-| Glioma | 241 |
+| Cancer Type               | Sample Count |
+| Lung cancer               | 1699 |
+| Colorectal cancer         | 1596 |
+| Gastric cancer            | 1418 |
+| Prostate cancer           | 1027 |
+| Pancreatic cancer         | 851 |
+| Breast cancer             | 675 |
+| Esophageal cancer         | 566 |
+| Biliary tract cancer      | 402 |
+| Ovarian cancer            | 400 |
+| Bladder cancer            | 399 |
+| Liver cancer              | 348 |
+| Sarcoma                   | 299 |
+| Glioma                    | 241 |
 
 ## 3. Data Processing
 
-* Label encoder applied for compatibility with XGBoost 3.3.0[cite: 9].
+* Label encoder (sklearn) applied for compatibility with XGBoost 3.3.0 (xgboost).
 
 ### `train_test_split`
 
-* Stratified by `disease.state`, `age_group` (cut from age), and `Sex`[cite: 9].
-* Split 4:1 for outer train and test sets[cite: 9].
+* Stratified by `disease.state`, `age_group` (cut from age), and `Sex`.
+* Split 4:1 for outer train and test sets.
 
 ```python
 >>> X_train.shape
@@ -44,7 +42,7 @@ This project develops a multi-class stacking classifier for 13 cancer types usin
 
 ### UMAP
 
-* Trained UMAP on the outer train set created above and collected 3 feature columns.
+* Trained UMAP (umap) on the outer train set created above and collected 3 feature columns.
 
 
 * Transformed the test set using the UMAP fitted to the train set and collected 3 feature columns.
@@ -60,7 +58,7 @@ This project develops a multi-class stacking classifier for 13 cancer types usin
 
 #### Cross-Validation (CV)
 
-**Singular fold execution:**
+Singular fold execution:
 
 * The outer train set (`X_train` and `X_train_augmented`) was split into 5 chunks.
 
@@ -71,17 +69,15 @@ This project develops a multi-class stacking classifier for 13 cancer types usin
 * Several learners were trained on the inner train set:
 
 
-* **Trained on raw data:** `['RandomForest', 'ExtraTrees', 'GLM_Logistic', 'SVM_Linear']`
+* Trained on raw data:                  `['RandomForestClassifier', 'ExtraTreesClassifier', 'LogisticRegression', 'LinearSVC'(with CalibratedClassifierCV]`
 
-* **Trained on augmented data (UMAP):** `['XGB', 'MLP1', 'MLP2']`
-
-
+* Trained on augmented data (UMAP):     `['XGBClassifier', 'MLPClassifier'(3 layer), 'MLPClassifier'(4 layer)]`
 
 * Class probabilities were predicted for the remaining samples in the inner test set and collected.
 
 
 
-**Aggregation across chunk combinations:**
+Aggregation across chunk combinations:
 This process was repeated across all 10 combinations of chunks. In total:
 
 * Each model was trained 10 times (10 separate models), leaving 70 total models trained:
@@ -102,10 +98,7 @@ This process was repeated across all 10 combinations of chunks. In total:
 * Each sample's 4 sets of predicted probabilities were geometrically averaged and concatenated to a new dataframe:
 
 
-* **Rows:** 7936 (patients)
-
-
-* **Cols:** 91 (7 models × 13 classes)
+* Stage 1 output: 7936 (patients) x 91 (7 models × 13 classes)
 
 
 

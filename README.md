@@ -31,12 +31,17 @@ TISSUE_OF_ORIGIN/
 ├── documentation.md            # Raw methodology notes
 ├── README.md                   # Project documentation
 └── requirements.txt            # Project dependencies
+```
 
 INSTALLATION
 
+```
 pip install -r requirements.txt  
+```
 
 SCRIPTS
 
+```
 python -m scripts.train  
 python -m scripts.validate 
+```

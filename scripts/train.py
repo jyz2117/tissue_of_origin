@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def main():
     logger.info("TRAIN START")
 
-    # 1. Load and Split Data
+    # 1. Load and Split data
     X, y = load_data('dat.csv', 'samples.csv')
     X_train, X_test, y_train, y_test = outer_split(X, y, test_size=0.2, random_state=seed)
 
@@ -28,14 +28,14 @@ def main():
     joblib.dump(y_test, DATA_DIR / "y_test.joblib")
     logger.info("Saved X_test and y_test for validation.")
 
-    # 2. UMAP Augmentation
+    # 2. UMAP aug
     logger.info("UMAP fit and transform on X_train")
     start_time = time.perf_counter()
     X_train_augmented, umap_cols = fit_umap_train(X_train)
     logger.info(f"UMAP total time: {time_convert(time.perf_counter() - start_time)}")
     logger.info("Saved X_train_augmented")
 
-    # 3. Stage 1 Training
+    # 3. Stage 1 
     logger.info("STAGE 1 TRAINING and STACKING")
     sample_predictions, trained_models, trained_augmented_models = stage1_train(
         X_train, 
