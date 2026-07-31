@@ -10,10 +10,12 @@ from xgboost import XGBClassifier
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 MODELS_DIR = BASE_DIR / "models"
+FIGURES_DIR = BASE_DIR / "figures"
 
 # Ensure directories exist
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 MODELS_DIR.mkdir(parents=True, exist_ok=True)
+FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Configuration Variables ---
 seed = 42

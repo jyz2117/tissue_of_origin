@@ -8,21 +8,16 @@ from src.config import models_to_skip, models, augmented_models
 
 logger = logging.getLogger(__name__)
 
-def test_pipeline(trained_models: dict, trained_augmented_models: dict, metaclassifier, X_test: pd.DataFrame, X_test_augmented: pd.DataFrame) -> np.ndarray:
+def build_stage2_features(
+    trained_models: dict, 
+    trained_augmented_models: dict, 
+    X_test: pd.DataFrame, 
+    X_test_augmented: pd.DataFrame
+) -> pd.DataFrame:
     """
-    Evaluates the pipeline on the test set, creating predictions from stage 1 models and passing them to stage 2.
-
-    Args:
-        trained_models (dict): Dictionary of trained standard base models.
-        trained_augmented_models (dict): Dictionary of trained augmented base models.
-        metaclassifier: Fitted stage 2 model.
-        X_test (pd.DataFrame): Test feature matrix.
-        X_test_augmented (pd.DataFrame): Test feature matrix with UMAP components.
-
-    Returns:
-        np.ndarray: Final class predictions from the metaclassifier.
+    Aggregates Stage 1 predictions across fold variants into a Stage 2 feature matrix for test data.
     """
-    logger.info("Running Stage 1 test predictions...")
+    logger.info("Building Stage 2 features from Stage 1 test predictions...")
     final_stage1_test_features = []
 
     for name in models.keys():
@@ -47,7 +42,7 @@ def test_pipeline(trained_models: dict, trained_augmented_models: dict, metaclas
 
     for name in augmented_models.keys():
         if name.startswith(models_to_skip):
-                continue
+            continue
         model_fold_probs = []
         specific_trained_models = [m for k, m in trained_augmented_models.items() if k.startswith(name)]
         
@@ -65,16 +60,29 @@ def test_pipeline(trained_models: dict, trained_augmented_models: dict, metaclas
         )
         final_stage1_test_features.append(df_model_probs)
 
-    logger.info("Generating Stage 2 test predictions...")
-    X_test_stage2 = pd.concat(final_stage1_test_features, axis=1)
-    stage2_preds = metaclassifier.predict(X_test_stage2)
+    return pd.concat(final_stage1_test_features, axis=1)
 
-    return stage2_preds
+
+def test_pipeline(
+    trained_models: dict, 
+    trained_augmented_models: dict, 
+    metaclassifier, 
+    X_test: pd.DataFrame, 
+    X_test_augmented: pd.DataFrame
+) -> np.ndarray:
+    """
+    Evaluates the pipeline on the test set and returns metaclassifier predictions.
+    """
+    X_test_stage2 = build_stage2_features(trained_models, trained_augmented_models, X_test, X_test_augmented)
+    logger.info("Generating Stage 2 test predictions...")
+    return metaclassifier.predict(X_test_stage2)
+
 
 def validate_metaclassifier(y_test: pd.Series, stage2_preds: np.ndarray) -> None:
     """Logs the final accuracy score of the metaclassifier."""
     acc = accuracy_score(y_test, stage2_preds)
     logger.info(f"Metaclassifier Final Accuracy: {acc:.4f}") 
+
 
 def validate_stage1(
     trained_models: dict, 
@@ -88,30 +96,16 @@ def validate_stage1(
     """
     logger.info("Validating Stage 1 model families (average score across folds)...")
 
-    # Evaluate standard base models
     for base_name in models.keys():
         if base_name.startswith(models_to_skip):
             continue
-
-        scores = [
-            model.score(X_test, y_test)
-            for key, model in trained_models.items()
-            if key.startswith(base_name)
-        ]
+        scores = [model.score(X_test, y_test) for key, model in trained_models.items() if key.startswith(base_name)]
         if scores:
-            avg_score = np.mean(scores)
-            logger.info(f"{base_name.ljust(20)} Mean Accuracy: {avg_score:.4f}")
+            logger.info(f"{base_name.ljust(20)} Mean Accuracy: {np.mean(scores):.4f}")
 
-    # Evaluate augmented base models (UMAP)
     for base_name in augmented_models.keys():
         if base_name.startswith(models_to_skip):
             continue
-
-        scores = [
-            model.score(X_test_augmented, y_test)
-            for key, model in trained_augmented_models.items()
-            if key.startswith(base_name)
-        ]
+        scores = [model.score(X_test_augmented, y_test) for key, model in trained_augmented_models.items() if key.startswith(base_name)]
         if scores:
-            avg_score = np.mean(scores)
-            logger.info(f"{base_name.ljust(20)} Mean Accuracy: {avg_score:.4f}")
+            logger.info(f"{base_name.ljust(20)} Mean Accuracy: {np.mean(scores):.4f}")
